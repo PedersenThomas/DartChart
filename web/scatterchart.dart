@@ -4,6 +4,7 @@ part of Chart;
  * Remarks. It can only handle positive numbers.
  */
 class ScatterChart {
+  bool showLinesBetweenPoints = false;
   svg.GElement container = new svg.GElement();
   Map<String, ScatterSerie> elements = new Map<String, ScatterSerie>();
 
@@ -24,6 +25,15 @@ class ScatterChart {
   }
 
   void refresh() {
+    elements.forEach((_,value) {
+      if (showLinesBetweenPoints) {
+        value.showLines();
+      } else {
+        value.hideLines();
+      }
+    });
+
+
     double x = 100.0, y = 650.0;
     double height = 600.0, width = 800.0;
     //Analyse data, Find bounds.
@@ -53,6 +63,20 @@ class ScatterChart {
           ..attributes['r'] = '3.5'
           ..attributes['fill'] = value.color;
       }
+
+      for(ScatterLine line in value.lines) {
+        double x1 = (line.start.x / HighestGridPointX * width + x);
+        double y1 = (y-(line.start.y / HighestGridPointY * height));
+        double x2 = (line.end.x / HighestGridPointX * width + x);
+        double y2 = (y-(line.end.y / HighestGridPointY * height));
+        line.line
+          ..attributes['x1'] = x1.toString()
+          ..attributes['y1'] = y1.toString()
+          ..attributes['x2'] = x2.toString()
+          ..attributes['y2'] = y2.toString()
+          ..attributes['stroke'] = value.color
+          ..attributes['stroke-width'] = (1).toString();
+      }
     });
   }
 
@@ -64,23 +88,58 @@ class ScatterChart {
 class ScatterSerie {
   String color;
   svg.GElement container = new svg.GElement();
+  svg.GElement linesContainer = new svg.GElement();
+
   List<ScatterPoint> points = new List<ScatterPoint>();
+  List<ScatterLine> lines = new List<ScatterLine>();
 
   ScatterSerie(List<List<double>> data, this.color) {
     const int x = 0;
     const int y = 1;
 
     if (data != null || data.length == 2 && data[x].length == data[y].length) {
+      ScatterPoint previusPoint;
       for(int row = 0; row < data[x].length; row += 1) {
         ScatterPoint point = new ScatterPoint(data[x][row], data[y][row]);
         points.add(point);
         container.children.add(point.toSvg());
+
+        if(previusPoint != null) {
+          ScatterLine line = new ScatterLine(previusPoint, point);
+          lines.add(line);
+          linesContainer.children.add(line.toSvg());
+        }
+
+        previusPoint = point;
       }
+    }
+  }
+
+  void hideLines() {
+    if (container.children.contains(linesContainer)) {
+      container.children.remove(linesContainer);
+    }
+  }
+
+  void showLines() {
+    if (!container.children.contains(linesContainer)) {
+      container.children.add(linesContainer);
     }
   }
 
   svg.SvgElement toSvg() {
     return container;
+  }
+}
+
+class ScatterLine {
+  ScatterPoint start, end;
+  svg.LineElement line = new svg.LineElement();
+
+  ScatterLine(this.start, this.end);
+
+  svg.SvgElement toSvg() {
+    return line;
   }
 }
 

@@ -170,10 +170,9 @@ void drawScatterPlot() {
       ..add(new List<double>())
       ..add(new List<double>());
   for (var i = 0; i < 500; i++) {
-    double zoomFactor = 200.0;
     double xOffSet = 1.0, yOffset = 1.0;
-    double x = (sin(i / 25) +xOffSet)*zoomFactor;
-    double y = (cos(i / 10) * 0.5 +yOffset)*zoomFactor;
+    double x = (sin(i / 25) +xOffSet);
+    double y = (cos(i / 10) * 0.5 +yOffset);
     series1[0].add(x);
     series1[1].add(y);
   }
@@ -182,19 +181,33 @@ void drawScatterPlot() {
       ..add(new List<double>())
       ..add(new List<double>());
   for (var i = 0; i < 500; i++) {
-    double zoomFactor = 200.0;
     double xOffSet = 1.0, yOffset = 1.0;
-    double x = (sin(i / 5) * 0.5 + xOffSet) * zoomFactor;
-    double y = (cos(i / 25) + yOffset) * zoomFactor;
+    double x = (sin(i / 5) * 0.5 + xOffSet);
+    double y = (cos(i / 25) + yOffset);
     series2[0].add(x);
     series2[1].add(y);
+  }
+
+  List<List<double>> series3 = new List<List<double>>()
+      ..add(new List<double>())
+      ..add(new List<double>());
+  int limit = 8;
+  for (int i = 1; i < limit; i++) {
+    double x = i.toDouble();
+    double y = log(i);
+    series3[0].add(x/limit * 2);
+    series3[1].add(y);
   }
 
   Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
   data['SampleData1'] = series1;
   data['SampleData2'] = series2;
-  ScatterChart scatter = new ScatterChart(data);
+  data['SampleData3'] = series3;
+  ScatterChart scatter = new ScatterChart(data)
+    ..showLinesBetweenPoints = true;
   SvgSvgElement e = query('#chartSvg')
       ..children.add(scatter.toSvg());
+
+  scatter.refresh();
 
 }
