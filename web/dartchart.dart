@@ -169,7 +169,7 @@ void drawScatterPlot() {
   List<List<double>> series1 = new List<List<double>>()
       ..add(new List<double>())
       ..add(new List<double>());
-  for (var i = 0; i < 500; i++) {
+  for (var i = 0; i < 315; i++) {
     double xOffSet = 1.0, yOffset = 1.0;
     double x = (sin(i / 25) +xOffSet);
     double y = (cos(i / 10) * 0.5 +yOffset);
@@ -180,7 +180,7 @@ void drawScatterPlot() {
   List<List<double>> series2 = new List<List<double>>()
       ..add(new List<double>())
       ..add(new List<double>());
-  for (var i = 0; i < 500; i++) {
+  for (var i = 0; i < 158; i++) {
     double xOffSet = 1.0, yOffset = 1.0;
     double x = (sin(i / 5) * 0.5 + xOffSet);
     double y = (cos(i / 25) + yOffset);

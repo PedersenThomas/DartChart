@@ -4,6 +4,7 @@ part of Chart;
  * Remarks. It can only handle positive numbers.
  */
 class ScatterChart {
+  List<String> colors = ['#3366cc', '#dc3912', '#109618', '#990099', '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395', '#b77322', '#329262', '#651067', '#8b0707', '#e67300', '#6633cc', '#aaaa11', '#22aa99', '#994499'];
   bool showLinesBetweenPoints = false;
   svg.GElement container = new svg.GElement();
   Map<String, ScatterSerie> elements = new Map<String, ScatterSerie>();
@@ -16,7 +17,7 @@ class ScatterChart {
 
   void addSerie(String key, List<List<double>> data) {
     if(!elements.containsKey(key)) {
-      String color = randomColor();
+      String color = colors[elements.length];
       ScatterSerie serie = new ScatterSerie(data, color);
       elements[key] = serie;
       container.children.add(serie.toSvg());
@@ -32,7 +33,6 @@ class ScatterChart {
         value.hideLines();
       }
     });
-
 
     double x = 100.0, y = 650.0;
     double height = 600.0, width = 800.0;
@@ -75,7 +75,7 @@ class ScatterChart {
           ..attributes['x2'] = x2.toString()
           ..attributes['y2'] = y2.toString()
           ..attributes['stroke'] = value.color
-          ..attributes['stroke-width'] = (1).toString();
+          ..attributes['stroke-width'] = (2).toString();
       }
     });
   }
