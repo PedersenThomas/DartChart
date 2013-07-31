@@ -11,3 +11,4 @@ import 'utilities.dart';
 part 'barChart.dart';
 part 'legend.dart';
 part 'piechart.dart';
+part 'scatterchart.dart';

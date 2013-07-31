@@ -21,13 +21,16 @@ Map<String, double> sampleData2 =
 void main() {
   setupClickEvents();
 
-  int chartPicker = 2;
+  int chartPicker = 3;
   switch(chartPicker){
     case 1:
       drawBarChart();
       break;
     case 2:
       drawPieChart();
+      break;
+    case 3:
+      drawScatterPlot();
       break;
     default:
   }
@@ -160,4 +163,38 @@ void drawPieChart() {
   pie = new pieChart(sampleData);
   e.children.add(pie.toSvg());
   randomUpdate();
+}
+
+void drawScatterPlot() {
+  List<List<double>> series1 = new List<List<double>>()
+      ..add(new List<double>())
+      ..add(new List<double>());
+  for (var i = 0; i < 500; i++) {
+    double zoomFactor = 200.0;
+    double xOffSet = 1.0, yOffset = 1.0;
+    double x = (sin(i / 25) +xOffSet)*zoomFactor;
+    double y = (cos(i / 10) * 0.5 +yOffset)*zoomFactor;
+    series1[0].add(x);
+    series1[1].add(y);
+  }
+
+  List<List<double>> series2 = new List<List<double>>()
+      ..add(new List<double>())
+      ..add(new List<double>());
+  for (var i = 0; i < 500; i++) {
+    double zoomFactor = 200.0;
+    double xOffSet = 1.0, yOffset = 1.0;
+    double x = (sin(i / 5) * 0.5 + xOffSet) * zoomFactor;
+    double y = (cos(i / 25) + yOffset) * zoomFactor;
+    series2[0].add(x);
+    series2[1].add(y);
+  }
+
+  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  data['SampleData1'] = series1;
+  data['SampleData2'] = series2;
+  ScatterChart scatter = new ScatterChart(data);
+  SvgSvgElement e = query('#chartSvg')
+      ..children.add(scatter.toSvg());
+
 }
