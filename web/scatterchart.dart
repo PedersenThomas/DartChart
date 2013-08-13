@@ -1,4 +1,8 @@
 part of Chart;
+/* TODO
+ * Idea: Only render the series that is requried to be rendered. This requires that you know how big the chart is, and what changes a changes make to it. 
+ *         Series one got a new upper bound, does it affect the other series.
+ */
 
 /**
  * Remarks. It can only handle positive numbers.
@@ -98,8 +102,9 @@ class ScatterChart {
     }
     
     double ex = 5.0, ey = 5.0;
-    double graphHeight = settings.height - by - topPadding - xLabel.getBBox().height - ey - xGridTextHeight,
-           graphWidth = settings.width - 2*by - yLabel.getBBox().height - ex - widestYGridText - settings.axisLineThickness;
+    double HW = 5.0, HH = 5.0;
+    double graphHeight = settings.height - by - topPadding - xLabel.getBBox().height - ey - xGridTextHeight - HH,
+           graphWidth = settings.width - 2*by - yLabel.getBBox().height - ex - widestYGridText - HW - settings.axisLineThickness;
     double graphX = settings.width - graphWidth - by,
            graphY = graphHeight + topPadding; //TODO
 
@@ -119,14 +124,13 @@ class ScatterChart {
         ..attributes['y2'] = ( graphY - ((i+1)/axis.horizontalGridLines.length) * graphHeight ).toString();
     }
     
-    
     double GH = graphHeight / settings.numberOfHorizontalGridLines;
     double GW = graphWidth / settings.numberOfVerticalGridLines;
     for(int i = 0; i < axis.xAxisGridTexts.length; i += 1) {
       axis.xAxisGridTexts[i]
         ..text = ( (i+1)/axis.verticalGridLines.length * highestX).toStringAsFixed(2)
         ..attributes['x'] = ( graphX + (i+1) * GW  ).toString()
-        ..attributes['y'] = (topPadding +  graphHeight + settings.axisLineThickness ).toString();
+        ..attributes['y'] = (topPadding +  graphHeight + settings.axisLineThickness + HH ).toString();
     }
     
     for(int i = 0; i < axis.yAxisGridTexts.length; i += 1) {
