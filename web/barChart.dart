@@ -17,6 +17,7 @@ class BarChart {
   barAxis axis;
 
   BarChart(this.settings, [Map<String, double> initialData]) {
+    gradientTest();
     axis = new barAxis();
     legend = new Legend(settings.width - settings.legendWidth.toDouble(), 10.0, settings.legendWidth.toDouble(), settings.height - 10.0);
 
@@ -30,6 +31,36 @@ class BarChart {
     refresh();
     //XXX Did somebody say hack?
     _refreshShortly;
+  }
+  
+  void gradientTest() {
+    svg.DefsElement defsContainer = new svg.DefsElement();
+    container.children.add(defsContainer);
+
+    svg.LinearGradientElement LG = new svg.LinearGradientElement();
+    svg.StopElement firstStop = new svg.StopElement()
+      ..attributes['offset'] = '0%'
+      ..attributes['stop-color'] = 'lightGreen';
+    svg.StopElement secondStop = new svg.StopElement()
+    ..attributes['offset'] = '100%'
+    ..attributes['stop-color'] = 'green';
+
+    LG.children.add(firstStop);
+    LG.children.add(secondStop);
+    
+    /*
+     * id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"
+     */
+    String id = 'grad1';
+    LG
+      ..attributes['id'] = id
+      ..attributes['x1'] = '0%'
+      ..attributes['y1'] = '0%'
+      ..attributes['x2'] = '0%'
+      ..attributes['y2'] = '100%';
+    defsContainer.children.add(LG);
+    
+    settings.colors.insert(0, 'url(#$id)');
   }
 
   //My family didn't die, angles didn't lose their wings, the world didn't explode. There is something wrong here.
@@ -421,7 +452,8 @@ class barItem {
   }
 
   /**
-   * Used for text inside a bar.
+   * XXX ???? TODO FIXME OR DELETEME
+   * Used for text inside a bar. NOT USED!
    */
   void setupObserver() {
     var mo = new html.MutationObserver((List<html.MutationRecord> changes, html.MutationObserver observer) {

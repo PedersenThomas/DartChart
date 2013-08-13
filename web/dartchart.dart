@@ -7,6 +7,7 @@ import 'chart.dart';
 
 BarChart bar;
 pieChart pie;
+ScatterChart scatter;
 int pieIndex = 1, barIndex = 1;
 Random ran = new Random();
 
@@ -55,6 +56,7 @@ void setupClickEvents() {
       print('RefreshButton');
       if (pie != null) {pie.refresh();}
       if (bar != null) {bar.refresh();}
+      if (scatter != null) {scatter.refresh();}
     });
 }
 
@@ -203,11 +205,11 @@ void drawScatterPlot() {
   data['SampleData1'] = series1;
   data['SampleData2'] = series2;
   data['SampleData3'] = series3;
-  ScatterChart scatter = new ScatterChart(data)
+  ScatterSettings settings = new ScatterSettings();
+  scatter = new ScatterChart(settings, data)
     ..showLinesBetweenPoints = true;
   SvgSvgElement e = query('#chartSvg')
       ..children.add(scatter.toSvg());
 
   scatter.refresh();
-
 }
