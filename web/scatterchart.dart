@@ -73,7 +73,15 @@ class ScatterChart {
         }
       }
     });
-
+    
+    if (settings.fitXAxis) {
+      highestX = fittedAxisTopValue(highestX);
+    }
+    
+    if (settings.fitYAxis) {
+      highestY = fittedAxisTopValue(highestY);
+    }
+    
     //Make sure that the right amount of gridLines are there.
     axis.makeSureThatGridLinesAndMarksCount(settings.numberOfVerticalGridLines, settings.numberOfHorizontalGridLines);
     
@@ -128,14 +136,14 @@ class ScatterChart {
     double GW = graphWidth / settings.numberOfVerticalGridLines;
     for(int i = 0; i < axis.xAxisGridTexts.length; i += 1) {
       axis.xAxisGridTexts[i]
-        ..text = ( (i+1)/axis.verticalGridLines.length * highestX).toStringAsFixed(2)
+        ..text = ( (i+1)/axis.verticalGridLines.length * highestX).toStringAsFixed(settings.xAxisDecimals)
         ..attributes['x'] = ( graphX + (i+1) * GW  ).toString()
         ..attributes['y'] = (topPadding +  graphHeight + settings.axisLineThickness + HH ).toString();
     }
     
     for(int i = 0; i < axis.yAxisGridTexts.length; i += 1) {
       axis.yAxisGridTexts[i]
-      ..text = ( (i+1)/axis.horizontalGridLines.length * highestY).toString()
+      ..text = ( (i+1)/axis.horizontalGridLines.length * highestY).toStringAsFixed(settings.yAxisDecimals)
       ..attributes['x'] = (by + yLabel.getBBox().height + ex + widestYGridText - axis.yAxisGridTexts[i].getBBox().width).toString()
       ..attributes['y'] = (graphY - ((i+1) * GH)).toString();
     }
@@ -252,7 +260,7 @@ class ScatterPoint {
 
   ScatterPoint(this.xValue, this.yValue);
 
-  svg.SvgElement toSvg(){
+  svg.SvgElement toSvg() {
     return point;
   }
 }
@@ -349,4 +357,8 @@ class ScatterSettings {
   double axisLineThickness = 3.0;
   int numberOfVerticalGridLines = 5;
   int numberOfHorizontalGridLines = 5;
+  int xAxisDecimals = 2;
+  int yAxisDecimals = 2;
+  bool fitXAxis = false;
+  bool fitYAxis = true;
 }

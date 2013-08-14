@@ -48,9 +48,6 @@ class BarChart {
     LG.children.add(firstStop);
     LG.children.add(secondStop);
     
-    /*
-     * id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"
-     */
     String id = 'grad1';
     LG
       ..attributes['id'] = id

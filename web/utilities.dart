@@ -15,6 +15,23 @@ String randomColor() {
   return '#$randomColor';
 }
 
+/**
+ * Gives a more hunam friendly top value for an axis.
+ */
+double fittedAxisTopValue(double maxValue) {
+  int digits = (log(maxValue) / LN10).floor();
+  if(digits <= 1) {
+    digits = 2;
+  }
+  
+  int modulus = pow(10, digits-1).toInt();
+  if (maxValue % modulus != 0){
+    maxValue += modulus - maxValue % modulus;
+  }
+
+  return maxValue;
+}
+
 class KeyValuePair<K, V> {
   K key;
   V value;

@@ -22,7 +22,7 @@ Map<String, double> sampleData2 =
 void main() {
   setupClickEvents();
 
-  int chartPicker = 3;
+  int chartPicker = 1;
   switch(chartPicker){
     case 1:
       drawBarChart();
@@ -168,6 +168,63 @@ void drawPieChart() {
 }
 
 void drawScatterPlot() {
+  Map<String, List<List<double>>> data = scatterData3();
+  
+  ScatterSettings settings = new ScatterSettings()
+    ..fitXAxis = false
+    ..fitYAxis = true
+    ..numberOfVerticalGridLines = 14
+    ..numberOfHorizontalGridLines = 10
+    ..yAxisDecimals = 1
+    ..xAxisDecimals = 0;
+  scatter = new ScatterChart(settings, data)
+    ..showLinesBetweenPoints = true;
+  SvgSvgElement e = query('#chartSvg')
+      ..children.add(scatter.toSvg());
+
+  scatter.refresh();
+}
+
+Map<String, List<List<double>>> scatterData3() {
+  Random ran = new Random();
+  
+  List<List<double>> series1 = new List<List<double>>()
+      ..add(new List<double>())
+      ..add(new List<double>());
+  for(var i = 0; i <= 100; i++) {
+    series1[0].add(i.toDouble());
+    double a = -0.004;
+    double b = 0.5;
+    double c = 5.0;
+    double value = a * i*i + b * i + c; 
+    series1[1].add(value);
+  }
+  
+  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  data['SampleData1'] = series1;
+  
+  return data;
+}
+
+Map<String, List<List<double>>> scatterData2() {
+  Random ran = new Random();
+  
+  int upperBound = 30;
+  List<List<double>> series1 = new List<List<double>>()
+      ..add(new List<double>())
+      ..add(new List<double>());
+  for(var i = 0; i <= 100; i++) {
+    series1[0].add(i.toDouble());
+    series1[1].add(ran.nextDouble() * upperBound);
+  }
+  
+  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  data['SampleData1'] = series1;
+  
+  return data;
+}
+
+Map<String, List<List<double>>> scatterData1() {
   List<List<double>> series1 = new List<List<double>>()
       ..add(new List<double>())
       ..add(new List<double>());
@@ -205,11 +262,6 @@ void drawScatterPlot() {
   data['SampleData1'] = series1;
   data['SampleData2'] = series2;
   data['SampleData3'] = series3;
-  ScatterSettings settings = new ScatterSettings();
-  scatter = new ScatterChart(settings, data)
-    ..showLinesBetweenPoints = true;
-  SvgSvgElement e = query('#chartSvg')
-      ..children.add(scatter.toSvg());
-
-  scatter.refresh();
+  
+  return data;
 }
