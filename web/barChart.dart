@@ -36,28 +36,65 @@ class BarChart {
   void gradientTest() {
     svg.DefsElement defsContainer = new svg.DefsElement();
     container.children.add(defsContainer);
-
+    svg.LinearGradientElement LG;
+    String id;
+    
+    id = 'grad1';
+    LG = gradiantTestHelper('lightgreen', 'green', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad2';
+    LG = gradiantTestHelper('lightblue', 'blue', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad3';
+    LG = gradiantTestHelper('pink', 'red', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad4';
+    LG = gradiantTestHelper('lightyellow', 'yellow', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad5';
+    LG = gradiantTestHelper('lightcyan', 'cyan', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad6';
+    LG = gradiantTestHelper('lightcoral', 'coral', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+    id = 'grad7';
+    LG = gradiantTestHelper('lightskyblue', 'skyblue', id);
+    defsContainer.children.add(LG);
+    settings.colors.insert(0, 'url(#$id)');
+    
+  }
+  
+  svg.LinearGradientElement gradiantTestHelper(String startColor, String stopColor, String id, {String x1: '0%', String y1: '0%', String x2: '0%', String y2: '100%'}) {
     svg.LinearGradientElement LG = new svg.LinearGradientElement();
     svg.StopElement firstStop = new svg.StopElement()
       ..attributes['offset'] = '0%'
-      ..attributes['stop-color'] = 'lightGreen';
+      ..attributes['stop-color'] = startColor;
     svg.StopElement secondStop = new svg.StopElement()
     ..attributes['offset'] = '100%'
-    ..attributes['stop-color'] = 'green';
+    ..attributes['stop-color'] = stopColor;
 
-    LG.children.add(firstStop);
-    LG.children.add(secondStop);
-    
-    String id = 'grad1';
     LG
       ..attributes['id'] = id
-      ..attributes['x1'] = '0%'
-      ..attributes['y1'] = '0%'
-      ..attributes['x2'] = '0%'
-      ..attributes['y2'] = '100%';
-    defsContainer.children.add(LG);
+      ..attributes['x1'] = x1
+      ..attributes['y1'] = y1
+      ..attributes['x2'] = x2
+      ..attributes['y2'] = y2
+      ..children.add(firstStop)
+      ..children.add(secondStop);
     
-    settings.colors.insert(0, 'url(#$id)');
+    return LG;
   }
 
   //My family didn't die, angles didn't lose their wings, the world didn't explode. There is something wrong here.
