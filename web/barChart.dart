@@ -433,16 +433,7 @@ class BarChart {
       }
     });
 
-    int digits = (log(maxValue) / LN10).floor();
-    if(digits <= 1){
-      digits = 2;
-    }
-    int modulus = pow(10, digits-1).toInt();
-    if (maxValue % modulus != 0){
-      maxValue += modulus - maxValue % modulus;
-    }
-
-    return maxValue;
+    return fittedAxisTopValue(maxValue);
   }
 }
 
