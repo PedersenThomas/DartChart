@@ -19,17 +19,10 @@ String randomColor() {
  * Gives a more hunam friendly top value for an axis.
  */
 double fittedAxisTopValue(double maxValue) {
-  int digits = (log(maxValue) / LN10).floor();
-  if(digits <= 1) {
-    digits = 2;
-  }
-  
-  int modulus = pow(10, digits-1).toInt();
-  if (maxValue % modulus != 0){
-    maxValue += modulus - maxValue % modulus;
-  }
+  const double prettyFactor = 0.5;
+  int exponent = ( (log(maxValue) / LN10) - prettyFactor).floor();
 
-  return maxValue;
+  return (maxValue / (pow(10, exponent))).ceil() * pow(10, exponent).toDouble();
 }
 
 class KeyValuePair<K, V> {
