@@ -8,52 +8,109 @@ part of Chart;
  * Remarks. It can only handle positive numbers.
  */
 class ScatterChart {
-  ScatterSettings settings;
-  ScatterAxis axis = new ScatterAxis();
-  List<String> colors = ['#3366cc', '#dc3912', '#109618', '#990099', '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395', '#b77322', '#329262', '#651067', '#8b0707', '#e67300', '#6633cc', '#aaaa11', '#22aa99', '#994499'];
-  bool showLinesBetweenPoints = false;
-  svg.GElement container = new svg.GElement();
-  Map<String, ScatterSerie> elements = new Map<String, ScatterSerie>();
+  ScatterSettings _settings;
+  ScatterAxis _axis = new ScatterAxis();
+  svg.GElement _container = new svg.GElement();
+  Map<String, ScatterSerie> _elements = new Map<String, ScatterSerie>();
 
-  svg.TextElement xLabel = new svg.TextElement();
-  svg.TextElement yLabel = new svg.TextElement();
+  svg.TextElement _xLabel = new svg.TextElement();
+  svg.TextElement _yLabel = new svg.TextElement();
 
-  ScatterChart(this.settings, [Map<String, List<List<double>>> initialData]) {
+  Legend legend;
+  
+  ScatterChart(this._settings, [Map<String, List<List<double>>> initialData]) {
     double bx = 5.0, by = 5.0; //FIXME Two bx and by. also found in refresh.
     // Step 1 X/Y-Label
-    yLabel
-      ..text = settings.yAxisLabelText
+    _yLabel
+      ..text = _settings.yAxisLabelText
       ..attributes['text-anchor'] = 'middel'
       ..attributes['stroke'] = 'none'
       ..attributes['stroke-width'] = '0'
       ..attributes['fill'] = '#222222';
 
-    xLabel
-      ..text = settings.xAxisLabelText;
+    _xLabel
+      ..text = _settings.xAxisLabelText;
 
-    container.children.add(xLabel);
-    container.children.add(yLabel);
-    container.children.add(axis.toSvg());
+    _container.children.add(_xLabel);
+    _container.children.add(_yLabel);
+    _container.children.add(_axis.toSvg());
 
+    legend = new Legend(_settings.width - _settings.legendWidth.toDouble(), 10.0, _settings.legendWidth.toDouble(), _settings.legendHeight);
+    legend.showData = false;
+    _container.children.add(legend.toSvg());
+    
     initialData.forEach((key, value) {
       addSerie(key, value);
     });
-
   }
 
   void addSerie(String key, List<List<double>> data) {
-    if(!elements.containsKey(key)) {
-      String color = colors[elements.length];
+    if(!_elements.containsKey(key)) {
+      String color = _settings.colors[_elements.length];
       ScatterSerie serie = new ScatterSerie(data, color);
-      elements[key] = serie;
-      container.children.add(serie.toSvg());
+      _elements[key] = serie;
+      _container.children.add(serie.toSvg());
+      
+      if(legend != null) {
+        legend.addDataPoint(key, 0.0, color);
+      }
     }
     refresh();
   }
+  
+  void addDatapointFirst(String serieKey, double x, double y) {
+    if (_elements.containsKey(serieKey)) {
+      _elements[serieKey].AddDatapointFirst(x, y);
+    }
+  }
+  
+  void addDatapointLast(String serieKey, double x, double y) {
+    if (_elements.containsKey(serieKey)) {
+      _elements[serieKey].AddDatapointLast(x, y);
+    }
+  }
+  
+  void addDatapoint(String serieKey, int index, double x, double y) {
+    if (_elements.containsKey(serieKey)) {
+      _elements[serieKey].AddDatapoint(index, x, y);
+    }
+  }
+  
+  void updateDatapoint(String serieKey, int index, double x, double y) {
+    if (_elements.containsKey(serieKey)) {
+      if (_elements[serieKey].points.length > index && index >= 0) {
+        _elements[serieKey].points[index]
+          ..xValue = x
+          ..yValue = y;
+        refresh();
+      }
+    }
+  }
+  
+  bool removeDatapoint(String serieKey, int index) {
+    if (_elements.containsKey(serieKey)) {
+      return _elements[serieKey].RemoveDatapoint(index);
+    }
+    return false;
+  }
+  
+  bool removeDatapointFirst(String serieKey) {
+    if (_elements.containsKey(serieKey)) {
+      _elements[serieKey].RemoveDatapointFirst();
+    }
+    return false;
+  }
+  
+  bool removeDatapointLast(String serieKey) {
+    if (_elements.containsKey(serieKey)) {
+      _elements[serieKey].RemoveDatapointLast();
+    }
+    return false;
+  }
 
   void refresh() {
-    elements.forEach((_,value) {
-      if (showLinesBetweenPoints) {
+    _elements.forEach((_,value) {
+      if (_settings.showLinesBetweenPoints) {
         value.showLines();
       } else {
         value.hideLines();
@@ -62,7 +119,7 @@ class ScatterChart {
 
     //Analyze data, Find bounds.
     double highestX = 0.0, highestY = 0.0;
-    elements.forEach((_, value) {
+    _elements.forEach((_, value) {
       for(ScatterPoint point in value.points) {
         if (point.xValue > highestX) {
           highestX = point.xValue;
@@ -74,92 +131,93 @@ class ScatterChart {
       }
     });
     
-    if (settings.fitXAxis) {
+    if (_settings.fitXAxis) {
       highestX = fittedAxisTopValue(highestX);
     }
     
-    if (settings.fitYAxis) {
+    if (_settings.fitYAxis) {
       highestY = fittedAxisTopValue(highestY);
     }
     
     //Make sure that the right amount of gridLines are there.
-    axis.makeSureThatGridLinesAndMarksCount(settings.numberOfVerticalGridLines, settings.numberOfHorizontalGridLines);
+    _axis.makeSureThatGridLinesAndMarksCount(_settings.numberOfVerticalGridLines, _settings.numberOfHorizontalGridLines);
     
     //Draw: Axis, Labels, legend
     double topPadding = 10.0;
     double bx = 5.0, by = 5.0;
-    yLabel
-      ..attributes['x'] = (bx - yLabel.getBBox().width/2).toString()
-      ..attributes['y'] = (settings.height/2).toString()
-      ..attributes['transform'] = 'rotate(-90 ${bx + yLabel.getBBox().height/2} ${settings.height/2})';
+    _yLabel
+      ..attributes['x'] = (bx - _yLabel.getBBox().width/2).toString()
+      ..attributes['y'] = (_settings.height/2).toString()
+      ..attributes['transform'] = 'rotate(-90 ${bx + _yLabel.getBBox().height/2} ${_settings.height/2})';
 
-    xLabel
-        ..attributes['x'] = (settings.width / 2 - xLabel.getBBox().width / 2).toString()
-        ..attributes['y'] = (settings.height - by).toString();
+    _xLabel
+        ..attributes['x'] = (_settings.width / 2 - _xLabel.getBBox().width / 2).toString()
+        ..attributes['y'] = (_settings.height - by).toString();
 
     double widestYGridText = 0.0;
-    for(var item in axis.yAxisGridTexts) {
+    for(var item in _axis.yAxisGridTexts) {
       if (item.getBBox().width > widestYGridText) {
         widestYGridText = item.getBBox().width;
       }
     }
     
     double xGridTextHeight = 0.0;
-    if (axis.xAxisGridTexts.length > 0) {
-      xGridTextHeight = axis.xAxisGridTexts.first.getBBox().height;
+    if (_axis.xAxisGridTexts.length > 0) {
+      xGridTextHeight = _axis.xAxisGridTexts.first.getBBox().height;
     }
     
     double ex = 5.0, ey = 5.0;
     double HW = 5.0, HH = 5.0;
-    double graphHeight = settings.height - by - topPadding - xLabel.getBBox().height - ey - xGridTextHeight - HH,
-           graphWidth = settings.width - 2*by - yLabel.getBBox().height - ex - widestYGridText - HW - settings.axisLineThickness;
-    double graphX = settings.width - graphWidth - by,
+    double graphHeight = _settings.height - by - topPadding - _xLabel.getBBox().height - ey - xGridTextHeight - HH,
+           graphWidth = _settings.width - 2*by - _yLabel.getBBox().height - ex - widestYGridText - HW - _settings.axisLineThickness - _settings.legendWidth;
+    double graphX = _settings.width - graphWidth - by - _settings.legendWidth,
            graphY = graphHeight + topPadding; //TODO
 
-    for (int i = 0; i < axis.verticalGridLines.length; i += 1) {
-      axis.verticalGridLines[i]
-        ..attributes['x1'] = ( ((i+1)/axis.verticalGridLines.length) * graphWidth + graphX ).toString()
+    for (int i = 0; i < _axis.verticalGridLines.length; i += 1) {
+      _axis.verticalGridLines[i]
+        ..attributes['x1'] = ( ((i+1)/_axis.verticalGridLines.length) * graphWidth + graphX ).toString()
         ..attributes['y1'] = (graphY).toString()
-        ..attributes['x2'] = ( ((i+1)/axis.verticalGridLines.length) * graphWidth + graphX).toString()
+        ..attributes['x2'] = ( ((i+1)/_axis.verticalGridLines.length) * graphWidth + graphX).toString()
         ..attributes['y2'] = (graphY - graphHeight).toString();
     }
 
-    for (int i = 0; i < axis.horizontalGridLines.length; i += 1) {
-      axis.horizontalGridLines[i]
+    for (int i = 0; i < _axis.horizontalGridLines.length; i += 1) {
+      _axis.horizontalGridLines[i]
         ..attributes['x1'] = ( graphX ).toString()
-        ..attributes['y1'] = ( graphY - ((i+1)/axis.horizontalGridLines.length) * graphHeight ).toString()
+        ..attributes['y1'] = ( graphY - ((i+1)/_axis.horizontalGridLines.length) * graphHeight ).toString()
         ..attributes['x2'] = ( graphX + graphWidth).toString()
-        ..attributes['y2'] = ( graphY - ((i+1)/axis.horizontalGridLines.length) * graphHeight ).toString();
+        ..attributes['y2'] = ( graphY - ((i+1)/_axis.horizontalGridLines.length) * graphHeight ).toString();
     }
     
-    double GH = graphHeight / settings.numberOfHorizontalGridLines;
-    double GW = graphWidth / settings.numberOfVerticalGridLines;
-    for(int i = 0; i < axis.xAxisGridTexts.length; i += 1) {
-      axis.xAxisGridTexts[i]
-        ..text = ( (i+1)/axis.verticalGridLines.length * highestX).toStringAsFixed(settings.xAxisDecimals)
-        ..attributes['x'] = ( graphX + (i+1) * GW  ).toString()
-        ..attributes['y'] = (topPadding +  graphHeight + settings.axisLineThickness + HH ).toString();
+    double GH = graphHeight / _settings.numberOfHorizontalGridLines;
+    double GW = graphWidth / _settings.numberOfVerticalGridLines;
+    for(int i = 0; i < _axis.xAxisGridTexts.length; i += 1) {
+      _axis.xAxisGridTexts[i]
+        ..text = ( (i+1)/_axis.verticalGridLines.length * highestX).toStringAsFixed(_settings.xAxisDecimals)
+        ..attributes['x'] = ( graphX + (i+1) * GW ).toString()
+        ..attributes['y'] = (topPadding +  graphHeight + _settings.axisLineThickness + HH ).toString();
     }
     
-    for(int i = 0; i < axis.yAxisGridTexts.length; i += 1) {
-      axis.yAxisGridTexts[i]
-      ..text = ( (i+1)/axis.horizontalGridLines.length * highestY).toStringAsFixed(settings.yAxisDecimals)
-      ..attributes['x'] = (by + yLabel.getBBox().height + ex + widestYGridText - axis.yAxisGridTexts[i].getBBox().width).toString()
+    for(int i = 0; i < _axis.yAxisGridTexts.length; i += 1) {
+      _axis.yAxisGridTexts[i]
+      ..text = ( (i+1)/_axis.horizontalGridLines.length * highestY).toStringAsFixed(_settings.yAxisDecimals)
+      ..attributes['x'] = (by + _yLabel.getBBox().height + ex + widestYGridText - _axis.yAxisGridTexts[i].getBBox().width).toString()
       ..attributes['y'] = (graphY - ((i+1) * GH)).toString();
     }
 
-    drawPoints(graphX, graphY, graphWidth, graphHeight, highestX, highestY);
+    _drawPoints(graphX, graphY, graphWidth, graphHeight, highestX, highestY);
+    
+    if(legend != null) {
+      legend.refresh();
+    }
   }
 
-  void drawPoints(double x, double y, double width, double height, double HighestGridPointX, double HighestGridPointY) {
-    elements.forEach((_, value) {
+  void _drawPoints(double x, double y, double width, double height, double HighestGridPointX, double HighestGridPointY) {
+    _elements.forEach((_, value) {
       for(ScatterPoint point in value.points) {
         point.point
           ..attributes['cx'] = ((point.xValue / HighestGridPointX) * width + x).toString()
-          ..attributes['cy'] = (y-((point.yValue / HighestGridPointY) * height)).toString()
-          //TODO MOVE, don't set this each time.
-          ..attributes['r'] = '3.5'
-          ..attributes['fill'] = value.color;
+          ..attributes['cy'] = (y-((point.yValue / HighestGridPointY) * height)).toString();
       }
 
       for(ScatterLine line in value.lines) {
@@ -178,25 +236,26 @@ class ScatterChart {
     });
 
     //Drawing Axis
-    axis.xAxis
-      ..attributes['x'] = (x - settings.axisLineThickness).toString()
+    _axis.xAxis
+      ..attributes['x'] = (x - _settings.axisLineThickness).toString()
       ..attributes['y'] = y.toString()
-      ..attributes['width'] = (width + settings.axisLineThickness).toString()
-      ..attributes['height'] = settings.axisLineThickness.toString();
+      ..attributes['width'] = (width + _settings.axisLineThickness).toString()
+      ..attributes['height'] = _settings.axisLineThickness.toString();
 
-    axis.yAxis
-      ..attributes['x'] = (x - settings.axisLineThickness).toString()
+    _axis.yAxis
+      ..attributes['x'] = (x - _settings.axisLineThickness).toString()
       ..attributes['y'] = (y-height).toString()
-      ..attributes['width'] = settings.axisLineThickness.toString()
-      ..attributes['height'] = (height + settings.axisLineThickness).toString();
+      ..attributes['width'] = _settings.axisLineThickness.toString()
+      ..attributes['height'] = (height + _settings.axisLineThickness).toString();
   }
 
   svg.SvgElement toSvg() {
-    return container;
+    return _container;
   }
 }
 
 class ScatterSerie {
+  static const double pointRadius = 3.5;
   String color;
   svg.GElement container = new svg.GElement();
   svg.GElement linesContainer = new svg.GElement();
@@ -211,7 +270,7 @@ class ScatterSerie {
     if (data != null || data.length == 2 && data[x].length == data[y].length) {
       ScatterPoint previusPoint;
       for(int row = 0; row < data[x].length; row += 1) {
-        ScatterPoint point = new ScatterPoint(data[x][row], data[y][row]);
+        ScatterPoint point = makePoint(data[x][row], data[y][row]);
         points.add(point);
         container.children.add(point.toSvg());
 
@@ -223,6 +282,110 @@ class ScatterSerie {
 
         previusPoint = point;
       }
+    }
+  }
+  
+  bool RemoveDatapoint(int index) {
+    if (index == 0) {
+      return RemoveDatapointFirst();
+      
+    } else if (index == points.length -1) {
+      return RemoveDatapointLast();
+      
+    } else if(index >= 0 && index < points.length){
+      var firstLineRemoved = linesContainer.children.remove(lines.removeAt(index -1).toSvg());
+      var secondLineRemoved = linesContainer.children.remove(lines.removeAt(index -1).toSvg());
+      var pointRemoved = container.children.remove(points.removeAt(index).toSvg());
+      
+      ScatterPoint previusPoint = points[index-1];
+      ScatterPoint nextPoint = points[index];
+      
+      ScatterLine line = new ScatterLine(previusPoint, nextPoint);
+      lines.insert(index -1 ,line);
+      linesContainer.children.add(line.toSvg());
+      
+      
+      return firstLineRemoved || secondLineRemoved || pointRemoved;
+      
+    }else {
+      return false;
+    }
+  }
+  
+  bool RemoveDatapointLast() {
+    var pointRemoved = container.children.remove(points.removeAt(points.length -1).toSvg());
+    var lineRemoved = linesContainer.children.remove(lines.removeAt(lines.length -1).toSvg());
+    return pointRemoved || lineRemoved;
+  }
+  
+  bool RemoveDatapointFirst() {
+    var pointRemoved = container.children.remove(points.removeAt(0).toSvg());
+    var lineRemoved = linesContainer.children.remove(lines.removeAt(0).toSvg());
+    return pointRemoved || lineRemoved;
+  }
+    
+  void AddDatapointFirst(double x, double y) {
+    ScatterPoint point = makePoint(x, y);
+    
+    if(points.length > 1) {
+      ScatterLine line = new ScatterLine(point, points.first);
+      lines.insert(0, line);
+      linesContainer.children.insert(0, line.toSvg());
+    }
+    
+    container.children.add(point.toSvg());
+    points.insert(0, point);
+  }
+  
+  void AddDatapointLast(double x, double y) {
+    ScatterPoint point = makePoint(x, y);
+    
+  
+    if(points.length > 1) {
+      ScatterLine line = new ScatterLine(points.last, point);
+      lines.add(line);
+      linesContainer.children.add(line.toSvg());
+    }
+
+    container.children.add(point.toSvg());
+    points.add(point);
+  }
+
+  ScatterPoint makePoint(double x, double y) {
+    ScatterPoint point = new ScatterPoint(x, y)
+    //TODO Radius should be a setting
+      ..point.attributes['r'] = (pointRadius).toString()
+      ..point.attributes['fill'] = color;
+    return point;
+  }
+  
+  void AddDatapoint(int index, double x, double y) {
+    if (index == 0) {
+      AddDatapointFirst(x, y);
+      
+    } else if (index == points.length -1) {
+      AddDatapointLast(x, y);
+      
+    } else if (points.length-1 > index && index > 0) {
+      //Removes line between to points, that no longer should be connected.
+      ScatterLine line = lines.removeAt(index-1);
+      linesContainer.children.remove(line.toSvg());
+      
+      ScatterPoint point = makePoint(x, y);
+      ScatterPoint previusPoint = points[index-1];
+      ScatterPoint nextPoint = points[index];
+      
+
+      ScatterLine previusLine = new ScatterLine(previusPoint, point);
+      lines.insert(index -1 ,previusLine);
+      linesContainer.children.add(previusLine.toSvg());
+      
+      ScatterLine nextLine = new ScatterLine(point, nextPoint);
+      lines.insert(index,nextLine);
+      linesContainer.children.add(nextLine.toSvg());
+
+      container.children.add(point.toSvg());
+      points.insert(index, point);
     }
   }
 
@@ -333,7 +496,8 @@ class ScatterAxis {
     while(yAxisGridTexts.length != verticalCount) {
       if (yAxisGridTexts.length < verticalCount) {
         svg.TextElement text = new svg.TextElement()
-          ..attributes['style'] = 'dominant-baseline: text-before-edge; text-anchor: start;';
+          ..attributes['dominant-baseline'] = 'middle'
+          ..attributes['text-anchor'] = 'start';
         yAxisGridTexts.add(text);
         container.children.add(text);
         
@@ -350,6 +514,8 @@ class ScatterAxis {
 }
 
 class ScatterSettings {
+  List<String> colors = ['#3366cc', '#109618', '#dc3912', '#990099', '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395', '#b77322', '#329262', '#651067', '#8b0707', '#e67300', '#6633cc', '#aaaa11', '#22aa99', '#994499'];
+  bool showLinesBetweenPoints = false;
   double height = 400.0;
   double width = 600.0;
   String xAxisLabelText = 'X Axis Label';
@@ -361,4 +527,6 @@ class ScatterSettings {
   int yAxisDecimals = 2;
   bool fitXAxis = false;
   bool fitYAxis = true;
+  double legendWidth = 110.0;
+  double legendHeight = 200.0;
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:html';
 import 'dart:math';
 import 'dart:svg';
@@ -22,8 +23,8 @@ Map<String, double> sampleData2 =
 void main() {
   setupClickEvents();
 
-  int chartPicker = 1;
-  switch(chartPicker){
+  int chartPicker = 3;
+  switch(chartPicker) {
     case 1:
       drawBarChart();
       break;
@@ -109,7 +110,7 @@ void drawBarChart() {
     ..legendSorted = true
     ..legendWidth = 150;
 
-  bar = new BarChart(settings, sampleData);
+  bar = new BarChart(settings, {'0':320.1});
   e.children.add(bar.toSvg());
   randomUpdate();
   //test(e);
@@ -168,17 +169,80 @@ void drawPieChart() {
 }
 
 void drawScatterPlot() {
-  Map<String, List<List<double>>> data = scatterData3();
+  int picker = 3;
+  Map<String, List<List<double>>> data;
+  ScatterSettings settings;
+  switch(picker) {
+    case 1:
+      data = scatterData1();
+      settings = new ScatterSettings()
+        ..width = 800.0
+        ..height = 400.0
+        ..fitXAxis = false
+        ..fitYAxis = true
+        ..numberOfVerticalGridLines = 14
+        ..numberOfHorizontalGridLines = 10
+        ..yAxisDecimals = 1
+        ..xAxisDecimals = 1
+        ..showLinesBetweenPoints = true;
+      break;
+      
+    case 2:
+      data = scatterData2();
+      settings = new ScatterSettings()
+        ..width = 800.0
+        ..height = 400.0
+        ..fitXAxis = false
+        ..fitYAxis = true
+        ..numberOfVerticalGridLines = 14
+        ..numberOfHorizontalGridLines = 10
+        ..yAxisDecimals = 1
+        ..xAxisDecimals = 0
+        ..showLinesBetweenPoints = true;
+      break;
+      
+    case 3:
+      data = scatterData3();
+      settings = new ScatterSettings()
+        ..width = 800.0
+        ..height = 400.0
+        ..fitXAxis = false
+        ..fitYAxis = true
+        ..numberOfVerticalGridLines = 14
+        ..numberOfHorizontalGridLines = 10
+        ..yAxisDecimals = 1
+        ..xAxisDecimals = 0
+        ..showLinesBetweenPoints = true;
+      
+    //  String serieKey = 'SampleData1';
+    //  
+    //  scatter.addDatapoint(serieKey, 10, 10.0, 20.0);
+    //  scatter.addDatapoint(serieKey, 11, 20.0, 25.0);
+    //  scatter.addDatapoint(serieKey, 12, 25.0, 19.0);
+    //
+    //  scatter.addDatapointFirst(serieKey, 0.0, 10.0);
+    //
+    //  scatter.addDatapointLast(serieKey, 110.0, 20.0);
+    // 
+    //  scatter.updateDatapoint(serieKey, 30, 50.0, 25.0);
+    //  
+    //  bool success;
+    //  int index = 35;
+    //  success = scatter.removeDatapoint(serieKey, index);
+    //  print('removing point at index: $index success? $success');
+    //
+    //  success = scatter.removeDatapoint(serieKey, index);
+    //  print('removing point at index: $index success? $success');
+    //
+    //  success = scatter.removeDatapoint(serieKey, index);
+    //  print('removing point at index: $index success? $success');
+    //
+    //  success = scatter.removeDatapoint(serieKey, index);
+    //  print('removing point at index: $index success? $success');
+      break;
+  }
   
-  ScatterSettings settings = new ScatterSettings()
-    ..fitXAxis = false
-    ..fitYAxis = true
-    ..numberOfVerticalGridLines = 14
-    ..numberOfHorizontalGridLines = 10
-    ..yAxisDecimals = 1
-    ..xAxisDecimals = 0;
-  scatter = new ScatterChart(settings, data)
-    ..showLinesBetweenPoints = true;
+  scatter = new ScatterChart(settings, data);
   SvgSvgElement e = query('#chartSvg')
       ..children.add(scatter.toSvg());
 
@@ -191,7 +255,7 @@ Map<String, List<List<double>>> scatterData3() {
   List<List<double>> series1 = new List<List<double>>()
       ..add(new List<double>())
       ..add(new List<double>());
-  for(var i = 0; i <= 100; i++) {
+  for(var i = 4; i <= 100; i += 2) {
     series1[0].add(i.toDouble());
     double a = -0.004;
     double b = 0.5;
@@ -200,7 +264,7 @@ Map<String, List<List<double>>> scatterData3() {
     series1[1].add(value);
   }
   
-  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  Map<String, List<List<double>>> data = new LinkedHashMap<String, List<List<double>>>();
   data['SampleData1'] = series1;
   
   return data;
@@ -218,7 +282,7 @@ Map<String, List<List<double>>> scatterData2() {
     series1[1].add(ran.nextDouble() * upperBound);
   }
   
-  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  Map<String, List<List<double>>> data = new LinkedHashMap<String, List<List<double>>>();
   data['SampleData1'] = series1;
   
   return data;
@@ -258,7 +322,7 @@ Map<String, List<List<double>>> scatterData1() {
     series3[1].add(y);
   }
 
-  Map<String, List<List<double>>> data = new Map<String, List<List<double>>>();
+  Map<String, List<List<double>>> data = new LinkedHashMap<String, List<List<double>>>();
   data['SampleData1'] = series1;
   data['SampleData2'] = series2;
   data['SampleData3'] = series3;
