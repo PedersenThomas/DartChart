@@ -6,6 +6,8 @@ import 'dart:html' as html;
 import 'dart:math';
 import 'dart:svg' as svg;
 
+import 'package:intl/intl.dart';
+
 import 'utilities.dart';
 
 part 'barChart.dart';

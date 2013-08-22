@@ -39,9 +39,11 @@ class ScatterChart {
     legend.showData = false;
     _container.children.add(legend.toSvg());
     
-    initialData.forEach((key, value) {
-      addSerie(key, value);
-    });
+    if (initialData != null) {
+      initialData.forEach((key, value) {
+        addSerie(key, value);
+      });
+    }
   }
 
   void addSerie(String key, List<List<double>> data) {
@@ -107,6 +109,13 @@ class ScatterChart {
     }
     return false;
   }
+  
+  int seriesCount(String serieKey) {
+    if (_elements.containsKey(serieKey)) {
+      return _elements[serieKey].points.length;
+    }
+    return 0;
+  }
 
   void refresh() {
     _elements.forEach((_,value) {
@@ -118,7 +127,22 @@ class ScatterChart {
     });
 
     //Analyze data, Find bounds.
-    double highestX = 0.0, highestY = 0.0;
+    double highestX, highestY;
+    double lowestX, lowestY;
+    
+    _elements.forEach((_, value) {
+      if(highestX == null) {
+        for(ScatterPoint point in value.points) {
+          lowestX = point.xValue;
+          lowestY = point.yValue;
+          
+          highestX = point.xValue;
+          highestY = point.yValue;
+          break;
+        }
+      }
+    });
+    
     _elements.forEach((_, value) {
       for(ScatterPoint point in value.points) {
         if (point.xValue > highestX) {
@@ -130,6 +154,14 @@ class ScatterChart {
         }
       }
     });
+    if(highestX == null) {
+      lowestX = 0.0;
+      lowestY = 0.0;
+      
+      highestX = 0.0;
+      highestY = 0.0;
+    }
+    
     
     if (_settings.fitXAxis) {
       highestX = fittedAxisTopValue(highestX);
@@ -138,7 +170,7 @@ class ScatterChart {
     if (_settings.fitYAxis) {
       highestY = fittedAxisTopValue(highestY);
     }
-    
+
     //Make sure that the right amount of gridLines are there.
     _axis.makeSureThatGridLinesAndMarksCount(_settings.numberOfVerticalGridLines, _settings.numberOfHorizontalGridLines);
     
@@ -193,9 +225,18 @@ class ScatterChart {
     double GW = graphWidth / _settings.numberOfVerticalGridLines;
     for(int i = 0; i < _axis.xAxisGridTexts.length; i += 1) {
       _axis.xAxisGridTexts[i]
-        ..text = ( (i+1)/_axis.verticalGridLines.length * highestX).toStringAsFixed(_settings.xAxisDecimals)
-        ..attributes['x'] = ( graphX + (i+1) * GW ).toString()
+        ..attributes['x'] = ( graphX + (i) * GW ).toString()
         ..attributes['y'] = (topPadding +  graphHeight + _settings.axisLineThickness + HH ).toString();
+      
+      if(_settings.xAxisType == 'datetime') {
+        
+        int epochTime = ((i) / _axis.verticalGridLines.length * (highestX - lowestX) + lowestX).toInt();
+        _axis.xAxisGridTexts[i]
+        ..text = new DateFormat(DateFormat.HOUR24_MINUTE_SECOND).format( new DateTime.fromMillisecondsSinceEpoch( epochTime ));
+      } else {
+        _axis.xAxisGridTexts[i]
+        ..text = ( (i)/_axis.verticalGridLines.length * (highestX - lowestX) + lowestX).toStringAsFixed(_settings.xAxisDecimals);
+      }
     }
     
     for(int i = 0; i < _axis.yAxisGridTexts.length; i += 1) {
@@ -205,19 +246,26 @@ class ScatterChart {
       ..attributes['y'] = (graphY - ((i+1) * GH)).toString();
     }
 
-    _drawPoints(graphX, graphY, graphWidth, graphHeight, highestX, highestY);
+    _drawPoints(graphX, graphY, graphWidth, graphHeight,lowestX, lowestY, highestX, highestY);
     
     if(legend != null) {
       legend.refresh();
     }
   }
 
-  void _drawPoints(double x, double y, double width, double height, double HighestGridPointX, double HighestGridPointY) {
+  double pointPlacement(double value, double low, double high, double width) {
+    return (value* width - low * width) / (high-low);
+  }
+  
+  void _drawPoints(double x, double y, double width, double height, double lowestGridPointX, double lowestGridPointY, double HighestGridPointX, double HighestGridPointY) {
     _elements.forEach((_, value) {
       for(ScatterPoint point in value.points) {
         point.point
-          ..attributes['cx'] = ((point.xValue / HighestGridPointX) * width + x).toString()
+          //..attributes['cx'] = ((point.xValue / HighestGridPointX) * width + x).toString()
           ..attributes['cy'] = (y-((point.yValue / HighestGridPointY) * height)).toString();
+        
+        point.point
+          ..attributes['cx'] = (pointPlacement(point.xValue, lowestGridPointX, HighestGridPointX, width) + x).toString();
       }
 
       for(ScatterLine line in value.lines) {
@@ -225,6 +273,10 @@ class ScatterChart {
         double y1 = (y-(line.start.yValue / HighestGridPointY * height));
         double x2 = (line.end.xValue / HighestGridPointX * width + x);
         double y2 = (y-(line.end.yValue / HighestGridPointY * height));
+        
+        x1 = pointPlacement(line.start.xValue, lowestGridPointX, HighestGridPointX, width) + x;
+        x2 = pointPlacement(line.end.xValue, lowestGridPointX, HighestGridPointX, width) + x;
+        
         line.line
           ..attributes['x1'] = x1.toString()
           ..attributes['y1'] = y1.toString()
@@ -267,7 +319,7 @@ class ScatterSerie {
     const int x = 0;
     const int y = 1;
 
-    if (data != null || data.length == 2 && data[x].length == data[y].length) {
+    if (data != null && data.length == 2 && data[x].length == data[y].length) {
       ScatterPoint previusPoint;
       for(int row = 0; row < data[x].length; row += 1) {
         ScatterPoint point = makePoint(data[x][row], data[y][row]);
@@ -340,8 +392,7 @@ class ScatterSerie {
   void AddDatapointLast(double x, double y) {
     ScatterPoint point = makePoint(x, y);
     
-  
-    if(points.length > 1) {
+    if(points.length >= 1) {
       ScatterLine line = new ScatterLine(points.last, point);
       lines.add(line);
       linesContainer.children.add(line.toSvg());
@@ -480,8 +531,8 @@ class ScatterAxis {
       }
     }
     
-    while(xAxisGridTexts.length != verticalCount) {
-      if (xAxisGridTexts.length < verticalCount) {
+    while(xAxisGridTexts.length != verticalCount +1) {
+      if (xAxisGridTexts.length < verticalCount +1) {
         svg.TextElement text = new svg.TextElement()
           ..attributes['style'] = 'dominant-baseline: text-before-edge; text-anchor: middle;';
         xAxisGridTexts.add(text);
@@ -529,4 +580,5 @@ class ScatterSettings {
   bool fitYAxis = true;
   double legendWidth = 110.0;
   double legendHeight = 200.0;
+  String xAxisType = 'numeric'; //'numeric', 'datetime'
 }

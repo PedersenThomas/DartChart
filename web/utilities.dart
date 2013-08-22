@@ -19,6 +19,9 @@ String randomColor() {
  * Gives a more hunam friendly top value for an axis.
  */
 double fittedAxisTopValue(double maxValue) {
+  if (maxValue == null || maxValue == 0.0) {
+    return 0.0;
+  }
   const double prettyFactor = 0.5;
   int exponent = ( (log(maxValue) / LN10) - prettyFactor).floor();
 
