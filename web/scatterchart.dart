@@ -254,18 +254,23 @@ class ScatterChart {
   }
 
   double pointPlacement(double value, double low, double high, double width) {
-    return (value* width - low * width) / (high-low);
+    if (value < low || value > high) {
+      return (high-low)/2 + low;
+    }
+    double res = (value* width - low * width) / (high-low);
+    if(res.isInfinite || res.isNaN || res.isNegative) {
+      print(res);
+    }
+    return res;
   }
   
   void _drawPoints(double x, double y, double width, double height, double lowestGridPointX, double lowestGridPointY, double HighestGridPointX, double HighestGridPointY) {
     _elements.forEach((_, value) {
       for(ScatterPoint point in value.points) {
         point.point
+          ..attributes['cx'] = (pointPlacement(point.xValue, lowestGridPointX, HighestGridPointX, width) + x).toString()
           //..attributes['cx'] = ((point.xValue / HighestGridPointX) * width + x).toString()
           ..attributes['cy'] = (y-((point.yValue / HighestGridPointY) * height)).toString();
-        
-        point.point
-          ..attributes['cx'] = (pointPlacement(point.xValue, lowestGridPointX, HighestGridPointX, width) + x).toString();
       }
 
       for(ScatterLine line in value.lines) {
@@ -403,6 +408,11 @@ class ScatterSerie {
   }
 
   ScatterPoint makePoint(double x, double y) {
+    if(x.isNaN || x.isInfinite || x.isNegative ||
+       y.isNaN || y.isInfinite || y.isNegative){
+      print('makePoint for Scatter points got invalid data: x:$x, y:$y');
+    }
+    
     ScatterPoint point = new ScatterPoint(x, y)
     //TODO Radius should be a setting
       ..point.attributes['r'] = (pointRadius).toString()
@@ -544,8 +554,8 @@ class ScatterAxis {
       }
     }
     
-    while(yAxisGridTexts.length != verticalCount) {
-      if (yAxisGridTexts.length < verticalCount) {
+    while(yAxisGridTexts.length != horizontalCount) {
+      if (yAxisGridTexts.length < horizontalCount) {
         svg.TextElement text = new svg.TextElement()
           ..attributes['dominant-baseline'] = 'middle'
           ..attributes['text-anchor'] = 'start';

@@ -7,7 +7,7 @@ import 'dart:svg';
 import 'chart.dart';
 
 void main() {
-  SvgSvgElement chartSvg = query('#chartSvg');
+  SvgSvgElement chartSvg = query('#averageCallTimeSvg');
   averageAgentTime(chartSvg);
 }
 
@@ -32,28 +32,32 @@ void averageAgentTime(SvgSvgElement container) {
   chart.addSerie(thomasKey, null);
   chart.addSerie(teamKey, null);
   
+  int chartPoints = 120;
   new Timer.periodic(new Duration(milliseconds: 1000), (t) {
-    int chartPoints = 120;
-    thomasTime = randomnumber(thomasTime, amplitude);
     alphaTime = randomnumber(alphaTime, amplitude*1.5);
     betaTime = randomnumber(betaTime, amplitude*2);
     deltaTime = randomnumber(deltaTime, amplitude*3);
     
     double x = new DateTime.now().millisecondsSinceEpoch.toDouble();
-    double y = thomasTime;
-    chart.addDatapointLast(thomasKey, x, y);
-    
-    y = (thomasTime + alphaTime + betaTime +deltaTime) / 4;
+    double y = (thomasTime + alphaTime + betaTime +deltaTime) / 4;;
+ 
     chart.addDatapointLast(teamKey, x, y);
-    
-    while (chart.seriesCount(thomasKey) > chartPoints) {
-      chart.removeDatapointFirst(thomasKey);
-    }
     
     while (chart.seriesCount(teamKey) > chartPoints) {
       chart.removeDatapointFirst(teamKey);
     }
     chart.refresh();
+  });
+  
+  new Timer.periodic(new Duration(milliseconds: 500), (_) {
+    double x = new DateTime.now().millisecondsSinceEpoch.toDouble();
+    double y = thomasTime;
+    chart.addDatapointLast(thomasKey, x, y);
+    thomasTime = randomnumber(thomasTime, amplitude);
+    
+    while (chart.seriesCount(thomasKey) > chartPoints * 2) {
+      chart.removeDatapointFirst(thomasKey);
+    }
   });
   
   container.children.add(chart.toSvg());
