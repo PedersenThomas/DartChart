@@ -10,6 +10,7 @@ packages
 
 # Don't track the auto generated javascript files.
 web/DartChart.dart.js*
+web/adaheadspreview.dart.js*
 
 # Don't track deploy and build files
 deploy
