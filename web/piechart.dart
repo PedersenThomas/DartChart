@@ -30,7 +30,7 @@ class pieChart {
   /**
    * Constructor making a new piechart.
    */
-  pieChart(Map<String, double> data) {
+  pieChart([Map<String, double> data]) {
     //??? Shouldn't we go the other way around this, and tell how much space we have, and based on that, we find the radius, and centerpoint.
     radius = 250.0;
     centerX = radius*1.15;
@@ -41,13 +41,15 @@ class pieChart {
     container.children.add(legend.toSvg());
 
     //Transforming the initial data into PieItems.
-    data.forEach((key, value) {
-      _PieItem item = _makeItem(value);
-      container.children.add(item.toSvg());
-      elements[key] = item;
+    if(data != null) {
+      data.forEach((key, value) {
+        _PieItem item = _makeItem(value);
+        container.children.add(item.toSvg());
+        elements[key] = item;
 
-      legend.addDataPoint(key, value, item.color);
-    });
+        legend.addDataPoint(key, value, item.color);
+      });
+    }
 
     refresh();
   }

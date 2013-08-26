@@ -7,9 +7,62 @@ import 'dart:svg';
 import 'chart.dart';
 
 void main() {
-  SvgSvgElement chartSvg = query('#averageCallTimeSvg');
-  averageAgentTime(chartSvg);
+  SvgSvgElement callTimeSvg = query('#averageCallTimeSvg');
+  averageAgentTime(callTimeSvg);
+  
+  SvgSvgElement waitingSvg = query('#waitingTimeSvg');
+  waitingTime(waitingSvg);
 }
+
+double zero = 0.0, ten = 0.0, twenty = 0.0, thirty = 0.0;
+String zeroKey = '0-10';
+String tenKey = '10-20';
+String twentyKey = '20-30';
+String thirtyKey = '30+';
+void waitingTime(SvgSvgElement container) {
+  double height = 600.0;
+  container.attributes['height'] = height.toString();
+  pieChart chart = new pieChart();
+  container.children.add(chart.toSvg());
+  
+  chart
+    ..addDataPoint(zeroKey, zero)
+    ..addDataPoint(tenKey, ten)
+    ..addDataPoint(twentyKey, twenty)
+    ..addDataPoint(thirtyKey, thirty);
+  
+  new Timer.periodic(new Duration(milliseconds: 1000), (_) {
+    int choice = ran.nextInt(10);
+    switch(choice){
+      case 0:
+      case 4:
+      case 5:
+        zero += 1.0;
+        chart.updateValue(zeroKey, zero);
+        break;
+        
+      case 1:
+      case 6:
+      case 8:
+      case 9:
+        ten += 1.0;
+        chart.updateValue(tenKey, ten);
+        break;
+        
+      case 2:
+      case 7:
+        twenty += 1.0;
+        chart.updateValue(twentyKey, twenty);
+        break;
+        
+      case 3:
+        thirty += 1.0;
+        chart.updateValue(thirtyKey, thirty);
+        break;
+    }
+  });
+}
+
 
 double thomasTime = 30.0;
 double alphaTime = 30.0;
@@ -18,10 +71,15 @@ double deltaTime = 30.0;
 double amplitude = 5.0;
 Random ran = new Random();
 void averageAgentTime(SvgSvgElement container) {
+  double height = 400.0;
+  container.attributes['height'] = height.toString();
+  
   ScatterSettings settings = new ScatterSettings()
+    ..xAxisLabelText = 'Tidspunkt'
+    ..yAxisLabelText = 'Gennemsnit antal sekunder for samtaletiden.'
     ..xAxisType = 'datetime'
     ..width = 1700.0
-    ..height = 400.0
+    ..height = height
     ..numberOfHorizontalGridLines = 10
     ..numberOfVerticalGridLines = 20
     ..showLinesBetweenPoints = true;
