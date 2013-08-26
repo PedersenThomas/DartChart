@@ -62,7 +62,7 @@ class Legend {
     if (item.getBBox().width > maxWidth) {
       String newKey = key.substring(0, key.length-1);
 
-      if (data != null && data != "") {
+      if (data != null && data != '') {
         item.text = '$newKey: $data';
       } else {
         item.text = '$newKey';
@@ -144,7 +144,7 @@ class LegendItem {
   svg.TextElement text = new svg.TextElement();
   String _color;
   double data;
-  String key = "";
+  String key = '';
 
   LegendItem(double data, this._color) {
     this.data = data;
@@ -155,7 +155,9 @@ class LegendItem {
       ..attributes['fill'] = _color;
 
     text
-      ..attributes['style'] = 'dominant-baseline: text-before-edge; text-anchor: start;';
+      ..attributes['dominant-baseline'] = 'text-before-edge'
+      ..attributes['text-anchor'] = 'start';
+//      ..attributes['style'] = 'dominant-baseline: text-before-edge; text-anchor: start;';
 
     container.children.add(colorBox);
     container.children.add(text);
