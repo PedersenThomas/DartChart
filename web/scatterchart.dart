@@ -43,6 +43,7 @@ class ScatterChart {
       initialData.forEach((key, value) {
         addSerie(key, value);
       });
+      refresh();
     }
   }
 
@@ -63,18 +64,21 @@ class ScatterChart {
   void addDatapointFirst(String serieKey, double x, double y) {
     if (_elements.containsKey(serieKey)) {
       _elements[serieKey].AddDatapointFirst(x, y);
+      refresh();
     }
   }
   
   void addDatapointLast(String serieKey, double x, double y) {
     if (_elements.containsKey(serieKey)) {
       _elements[serieKey].AddDatapointLast(x, y);
+      refresh();
     }
   }
   
   void addDatapoint(String serieKey, int index, double x, double y) {
     if (_elements.containsKey(serieKey)) {
       _elements[serieKey].AddDatapoint(index, x, y);
+      refresh();
     }
   }
   
@@ -92,6 +96,7 @@ class ScatterChart {
   bool removeDatapoint(String serieKey, int index) {
     if (_elements.containsKey(serieKey)) {
       return _elements[serieKey].RemoveDatapoint(index);
+      refresh();
     }
     return false;
   }
@@ -99,6 +104,7 @@ class ScatterChart {
   bool removeDatapointFirst(String serieKey) {
     if (_elements.containsKey(serieKey)) {
       _elements[serieKey].RemoveDatapointFirst();
+      refresh();
     }
     return false;
   }
@@ -106,6 +112,7 @@ class ScatterChart {
   bool removeDatapointLast(String serieKey) {
     if (_elements.containsKey(serieKey)) {
       _elements[serieKey].RemoveDatapointLast();
+      refresh();
     }
     return false;
   }
@@ -254,14 +261,11 @@ class ScatterChart {
   }
 
   double pointPlacement(double value, double low, double high, double width) {
-    if (value < low || value > high) {
-      return (high-low)/2 + low;
+    if (value < low || value > high || high == low) {
+      return 0.0;
+    } else {
+      return (value* width - low * width) / (high-low);  
     }
-    double res = (value* width - low * width) / (high-low);
-    if(res.isInfinite || res.isNaN || res.isNegative) {
-      print(res);
-    }
-    return res;
   }
   
   void _drawPoints(double x, double y, double width, double height, double lowestGridPointX, double lowestGridPointY, double HighestGridPointX, double HighestGridPointY) {
@@ -269,7 +273,6 @@ class ScatterChart {
       for(ScatterPoint point in value.points) {
         point.point
           ..attributes['cx'] = (pointPlacement(point.xValue, lowestGridPointX, HighestGridPointX, width) + x).toString()
-          //..attributes['cx'] = ((point.xValue / HighestGridPointX) * width + x).toString()
           ..attributes['cy'] = (y-((point.yValue / HighestGridPointY) * height)).toString();
       }
 

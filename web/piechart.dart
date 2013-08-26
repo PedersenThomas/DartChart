@@ -189,7 +189,6 @@ class pieChart {
    * Redraws the svg.
    */
   void refresh() {
-    print('Piechart Refresh');
     //Analyzses data. Finds the total.
     double sum = 0.0;
     elements.forEach((key, value){

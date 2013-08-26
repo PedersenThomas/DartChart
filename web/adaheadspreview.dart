@@ -104,7 +104,6 @@ void averageAgentTime(SvgSvgElement container) {
     while (chart.seriesCount(teamKey) > chartPoints) {
       chart.removeDatapointFirst(teamKey);
     }
-    chart.refresh();
   });
   
   new Timer.periodic(new Duration(milliseconds: 500), (_) {
