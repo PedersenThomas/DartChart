@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:html';
 import 'dart:math';
 import 'dart:svg';
@@ -19,6 +18,7 @@ String zeroKey = '0-10';
 String tenKey = '10-20';
 String twentyKey = '20-30';
 String thirtyKey = '30+';
+
 void waitingTime(SvgSvgElement container) {
   double height = 600.0;
   container.attributes['height'] = height.toString();

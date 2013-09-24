@@ -4,28 +4,28 @@ packages:
   analyzer_experimental:
     description: analyzer_experimental
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   args:
     description: args
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   browser:
     description: browser
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   intl:
     description: intl
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   logging:
     description: logging
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   path:
     description: path
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"
   unmodifiable_collection:
     description: unmodifiable_collection
     source: hosted
-    version: "0.6.19"
+    version: "0.6.21+3"

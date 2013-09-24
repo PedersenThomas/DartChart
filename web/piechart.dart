@@ -120,7 +120,7 @@ class pieChart {
           }
         }
       });
-
+      
       item.inlineText.attributes['visibility'] = showText ? 'visible' : 'hidden';
     });
   }
@@ -200,6 +200,13 @@ class pieChart {
     List<_LineSegment> linesegments = new List<_LineSegment>();
 
     elements.forEach((String key, _PieItem value) {
+      if(value.data <= 0.0) {
+        value.element.attributes['visibility'] = 'hidden';
+        
+      } else if (value.element.attributes.containsKey('visibility')){
+        value.element.attributes.remove('visibility');
+      }
+        
       double procetages = (value.data / sum) * 100;
       value.inlineText.text = procetages.toStringAsFixed(2) + '%';
       double cx = centerX, cy = centerY;
@@ -244,6 +251,7 @@ class pieChart {
         d = 'M $cx $cy L $startX $starty A $radius $radius 0 $bigArc 1 $endX $endy z';
       }
       value.element.attributes['d'] = d;
+    
     });
 
     //TODO find a better way to get back into the message queue.

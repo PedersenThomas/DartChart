@@ -95,8 +95,9 @@ class ScatterChart {
   
   bool removeDatapoint(String serieKey, int index) {
     if (_elements.containsKey(serieKey)) {
-      return _elements[serieKey].RemoveDatapoint(index);
+      var dataPoint = _elements[serieKey].RemoveDatapoint(index);
       refresh();
+      return dataPoint;
     }
     return false;
   }
